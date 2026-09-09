@@ -419,8 +419,8 @@
                                                             <div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
                                                             <span class="text-primary fw-semibold">Hệ thống đang tự động lắng nghe giao dịch chuyển khoản...</span>
                                                         </div>
-                                                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 shadow-sm fw-bold" onclick="showPaymentSuccessToast('BK${b.id}', ${b.id})">
-                                                            <i class="bi bi-arrow-repeat me-1"></i> Kiểm tra & Duyệt ngay
+                                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold" onclick="checkPaymentStatus('BK${b.id}', ${b.id})">
+                                                            <i class="bi bi-arrow-repeat me-1"></i> Kiểm tra tiền về
                                                         </button>
                                                     </div>
 
@@ -436,12 +436,17 @@
 
                                         <div class="modal-footer bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                             <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal" onclick="closeModal('payModal_${b.id}')">Đóng</button>
-                                            <div class="d-flex gap-2 flex-wrap">
-                                                <a href="${pageContext.request.contextPath}/payment/vnpay-create?bookingId=${b.id}" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm d-flex align-items-center gap-1">
-                                                    <i class="bi bi-credit-card-fill me-1"></i> Thanh toán VNPay
+                                            <div class="d-flex gap-2 flex-wrap align-items-center">
+                                                <c:if test="${sessionScope.user.role == 'ADMIN' || sessionScope.user.role == 'MANAGER'}">
+                                                    <button type="button" class="btn btn-outline-warning text-dark fw-bold rounded-pill px-3 shadow-sm btn-sm" onclick="adminForceApprove('${b.id}', 'BK${b.id}')" title="Chỉ hiển thị cho Quản trị viên để test duyệt đơn mà không cần chuyển khoản">
+                                                        <i class="bi bi-shield-check me-1"></i> [Admin] Duyệt Test
+                                                    </button>
+                                                </c:if>
+                                                <a href="${pageContext.request.contextPath}/payment/vnpay-create?bookingId=${b.id}" class="btn btn-danger fw-bold rounded-pill px-3 shadow-sm d-flex align-items-center gap-1">
+                                                    <i class="bi bi-credit-card-fill me-1"></i> Cổng VNPay
                                                 </a>
-                                                <button type="button" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm" onclick="closeModal('payModal_${b.id}'); showPaymentSuccessToast('BK${b.id}', ${b.id})">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Tôi Đã Chuyển Khoản VietQR
+                                                <button type="button" class="btn btn-success fw-bold rounded-pill px-3 shadow-sm" onclick="checkPaymentStatus('BK${b.id}', ${b.id})">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Tôi Đã Chuyển Khoản Xong
                                                 </button>
                                             </div>
                                         </div>
@@ -820,78 +825,105 @@
     }
 
     /**
-     * Tự động đối soát và xác nhận thanh toán qua API BIDV Napas247
+     * Kiểm tra đối soát trạng thái thanh toán thực tế từ Ngân hàng
      */
-    async function showPaymentSuccessToast(bookingCode, bookingId) {
+    async function checkPaymentStatus(bookingCode, bookingId) {
         if (!window.Swal) {
-            alert('Cảm ơn bạn! Đã nhận thông tin chuyển khoản cho đơn ' + bookingCode + '. Hệ thống đang đối soát tự động.');
             window.location.reload();
             return;
         }
 
-        // 1. Hiển thị trạng thái đang đối soát tự động
         Swal.fire({
-            title: '<h5 class="fw-bold text-primary mb-1">Đang Đối Soát Giao Dịch...</h5>',
+            title: '<h5 class="fw-bold text-primary mb-1">Đang Kiểm Tra Giao Dịch...</h5>',
             html: '<div class="text-center py-3">' +
-                  '  <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>' +
-                  '  <p class="text-secondary small mb-1">Đang kết nối cổng Napas247 BIDV đối soát mã <strong>' + bookingCode + '</strong></p>' +
-                  '  <small class="text-muted">Hệ thống sẽ tự động xác nhận và phát hành vé sau 1-2 giây...</small>' +
+                  '  <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>' +
+                  '  <p class="text-secondary small mb-1">Đang đối soát tín hiệu chuyển khoản cho đơn <strong>#' + bookingCode + '</strong></p>' +
+                  '  <small class="text-muted">Vui lòng chờ trong giây lát...</small>' +
                   '</div>',
             allowOutsideClick: false,
             showConfirmButton: false
         });
 
         try {
-            // 2. Gọi API Auto-Reconcile ở Backend
             const response = await fetch('${pageContext.request.contextPath}/payment/check?action=autoReconcile&bookingId=' + bookingId);
             const data = await response.json();
 
-            // 3. Hiển thị popup thành công rực rỡ và reload trang
-            setTimeout(() => {
+            if (data && data.isPaid) {
                 Swal.fire({
                     icon: 'success',
                     iconColor: '#10b981',
-                    title: '<h4 class="fw-bold text-success mb-1">Thanh Toán & Xác Nhận Thành Công!</h4>',
+                    title: '<h4 class="fw-bold text-success mb-1">Đã Nhận Tiền & Xác Nhận Thành Công!</h4>',
                     html: '<div class="text-start px-1 py-1">' +
-                          '  <p class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.6;">' +
-                          '    Hệ thống đã tự động đối soát khớp lệnh Napas247 cho đơn hàng ' +
-                          '    <span class="badge text-bg-warning font-monospace fs-6 px-2 py-1 border border-warning">#' + bookingCode + '</span>.' +
+                          '  <p class="text-secondary mb-3">' +
+                          '    Hệ thống đã nhận được tiền chuyển khoản cho đơn hàng ' +
+                          '    <span class="badge text-bg-warning font-monospace fs-6 px-2 py-1">#' + bookingCode + '</span>.' +
                           '  </p>' +
-                          '  <div class="p-3 bg-light rounded-4 border mb-3" style="font-size: 0.88rem; line-height: 1.6;">' +
-                          '    <div class="d-flex align-items-start mb-2">' +
-                          '      <i class="bi bi-check-circle-fill text-success fs-5 me-2 flex-shrink-0"></i>' +
-                          '      <span class="text-dark fw-semibold">Trạng thái: <span class="badge text-bg-success">ĐÃ XÁC NHẬN</span> (Tự động duyệt 100%)</span>' +
-                          '    </div>' +
-                          '    <div class="d-flex align-items-start">' +
-                          '      <i class="bi bi-printer-fill text-primary fs-5 me-2 flex-shrink-0"></i>' +
-                          '      <span class="text-secondary">Vé Du Lịch Điện Tử (E-Ticket) và mã QR Check-in đã sẵn sàng.</span>' +
-                          '    </div>' +
+                          '  <div class="p-3 bg-light rounded-3 border mb-2 small">' +
+                          '    <div class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-1"></i> Trạng thái: ĐÃ XÁC NHẬN (CONFIRMED)</div>' +
+                          '    <div class="text-muted"><i class="bi bi-ticket-perforated me-1"></i> Vé du lịch điện tử & Hợp đồng đã được kích hoạt.</div>' +
                           '  </div>' +
                           '</div>',
-                    confirmButtonText: '<i class="bi bi-ticket-perforated-fill me-1"></i> Xem Vé Điện Tử & In Ngay',
+                    confirmButtonText: '<i class="bi bi-ticket-perforated-fill me-1"></i> Xem Vé & Hợp Đồng Ngay',
                     customClass: {
-                        popup: 'rounded-4 shadow-lg border-0 p-4',
                         confirmButton: 'btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm'
-                    },
-                    buttonsStyling: false
+                    }
                 }).then(() => {
                     window.location.reload();
                 });
-            }, 1200);
-
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    iconColor: '#f59e0b',
+                    title: '<h5 class="fw-bold text-warning mb-1">Chưa Nhận Được Tiền Chuyển Khoản</h5>',
+                    html: '<div class="text-start px-1 py-1">' +
+                          '  <p class="text-secondary mb-3 small">' +
+                          '    Hệ thống ngân hàng chưa ghi nhận biến động số dư cho đơn hàng ' +
+                          '    <strong class="text-dark">#' + bookingCode + '</strong>.' +
+                          '  </p>' +
+                          '  <div class="p-3 bg-light rounded-3 border small mb-2">' +
+                          '    <div class="fw-bold text-dark mb-1"><i class="bi bi-info-circle me-1 text-primary"></i> Quý khách lưu ý:</div>' +
+                          '    <ul class="mb-0 ps-3 text-muted">' +
+                          '      <li>Vui lòng kiểm tra đã chuyển đúng nội dung: <strong class="text-danger">BK' + bookingId + '</strong></li>' +
+                          '      <li>Nếu quý khách vừa chuyển, ngân hàng có thể mất <strong>30s - 1 phút</strong> để truyền tín hiệu Webhook.</li>' +
+                          '      <li>Hệ thống đang chạy lắng nghe tự động, khi tiền vào modal sẽ tự duyệt ngay lập tức.</li>' +
+                          '    </ul>' +
+                          '  </div>' +
+                          '</div>',
+                    confirmButtonText: '<i class="bi bi-arrow-repeat me-1"></i> Đã Hiểu, Tôi Sẽ Đợi',
+                    customClass: {
+                        confirmButton: 'btn btn-primary rounded-pill px-4 py-2 fw-bold'
+                    }
+                });
+            }
         } catch (err) {
             Swal.fire({
-                icon: 'info',
-                title: '<h4 class="fw-bold text-primary mb-1">Đã Ghi Nhận Thanh Toán!</h4>',
-                text: 'Cảm ơn bạn! Thông tin chuyển khoản cho đơn ' + bookingCode + ' đã được ghi nhận và đang được xử lý.',
-                confirmButtonText: 'Đóng',
-                customClass: {
-                    confirmButton: 'btn btn-primary rounded-pill px-4 py-2'
-                },
-                buttonsStyling: false
-            }).then(() => {
-                window.location.reload();
+                icon: 'error',
+                title: '<h5 class="fw-bold text-danger mb-1">Lỗi Kết Nối</h5>',
+                text: 'Không thể kết nối đến máy chủ đối soát. Vui lòng thử lại sau giây lát!',
+                confirmButtonText: 'Đóng'
             });
+        }
+    }
+
+    /**
+     * Dành riêng cho Quản trị viên / Manager duyệt test đơn hàng ngay
+     */
+    async function adminForceApprove(bookingId, bookingCode) {
+        if (!confirm('[QUẢN TRỊ VIÊN] Bạn có chắc muốn duyệt test đơn hàng #' + bookingCode + ' mà không cần chờ chuyển khoản thực tế?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('${pageContext.request.contextPath}/payment/check?action=autoReconcile&staffOverride=true&bookingId=' + bookingId);
+            const data = await response.json();
+            if (data && data.success) {
+                alert('Quản trị viên đã duyệt đơn #' + bookingCode + ' thành công!');
+                window.location.reload();
+            } else {
+                alert(data ? data.message : 'Duyệt thất bại.');
+            }
+        } catch (e) {
+            alert('Lỗi kết nối máy chủ.');
         }
     }
 </script>

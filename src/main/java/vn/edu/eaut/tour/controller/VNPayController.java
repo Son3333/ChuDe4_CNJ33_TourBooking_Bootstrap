@@ -69,14 +69,17 @@ public class VNPayController extends HttpServlet {
         }
 
         long vnpAmount = (long) (amount * 100);
-        String vnp_TxnRef = bookingId + "_" + System.currentTimeMillis();
+        String vnp_TxnRef = bookingId + "T" + System.currentTimeMillis();
         String vnp_IpAddr = VNPayConfig.getIpAddress(req);
 
-        String scheme = req.getScheme();
-        String serverName = req.getServerName();
-        int serverPort = req.getServerPort();
+        String scheme = req.getHeader("X-Forwarded-Proto");
+        if (scheme == null || scheme.isBlank()) scheme = req.getScheme();
+        String host = req.getHeader("X-Forwarded-Host");
+        if (host == null || host.isBlank()) host = req.getHeader("Host");
+        if (host == null || host.isBlank()) host = req.getServerName();
+
         String contextPath = req.getContextPath();
-        String baseUrl = scheme + "://" + serverName + ((serverPort == 80 || serverPort == 443) ? "" : ":" + serverPort) + contextPath;
+        String baseUrl = scheme + "://" + host + (contextPath != null ? contextPath : "");
         String vnp_ReturnUrl = baseUrl + "/payment/vnpay-return";
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -107,21 +110,19 @@ public class VNPayController extends HttpServlet {
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-        Iterator<String> itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            String fieldName = itr.next();
+        boolean first = true;
+        for (String fieldName : fieldNames) {
             String fieldValue = vnp_Params.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName);
-                hashData.append('=');
-                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
-                query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                if (itr.hasNext()) {
-                    query.append('&');
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+                if (!first) {
                     hashData.append('&');
+                    query.append('&');
                 }
+                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()))
+                     .append('=')
+                     .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                first = false;
             }
         }
         String queryUrl = query.toString();
@@ -154,9 +155,13 @@ public class VNPayController extends HttpServlet {
             String vnp_ResponseCode = req.getParameter("vnp_ResponseCode");
             String vnp_TxnRef = req.getParameter("vnp_TxnRef");
             int bookingId = 0;
-            if (vnp_TxnRef != null && vnp_TxnRef.contains("_")) {
+            if (vnp_TxnRef != null) {
                 try {
-                    bookingId = Integer.parseInt(vnp_TxnRef.split("_")[0]);
+                    if (vnp_TxnRef.contains("T")) {
+                        bookingId = Integer.parseInt(vnp_TxnRef.split("T")[0]);
+                    } else if (vnp_TxnRef.contains("_")) {
+                        bookingId = Integer.parseInt(vnp_TxnRef.split("_")[0]);
+                    }
                 } catch (Exception ignored) {}
             }
 

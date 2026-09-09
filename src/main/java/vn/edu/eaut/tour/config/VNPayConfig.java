@@ -10,18 +10,33 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class VNPayConfig {
-    public static final String VNP_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static final String VNP_TMN_CODE = "CGXZLS0Z";
-    public static final String VNP_HASH_SECRET = "XNBCJFAKAZQSGTARRLTXCZZQGTUYHIUZ";
+    public static final String VNP_PAY_URL = getEnvOrDefault("VNP_PAY_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+    public static final String VNP_TMN_CODE = getEnvOrDefault("VNP_TMN_CODE", "CGXZLS0Z");
+    public static final String VNP_HASH_SECRET = getEnvOrDefault("VNP_HASH_SECRET", "XNBCJFAKAZQSGTARRLTXCZZQGTUYHIUZ");
     public static final String VNP_VERSION = "2.1.0";
     public static final String VNP_COMMAND = "pay";
+
+    private static String getEnvOrDefault(String key, String def) {
+        String val = System.getenv(key);
+        if (val != null && !val.trim().isEmpty()) {
+            return val.trim();
+        }
+        val = System.getProperty(key);
+        if (val != null && !val.trim().isEmpty()) {
+            return val.trim();
+        }
+        return def;
+    }
 
     public static String getIpAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null || ipAddress.isEmpty()) {
             ipAddress = request.getRemoteAddr();
         }
-        if ("0:0:0:0:0:0:0:1".equals(ipAddress)) {
+        if (ipAddress != null && ipAddress.contains(",")) {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "0:0:0:0:0:0:0:1".equals(ipAddress)) {
             ipAddress = "127.0.0.1";
         }
         return ipAddress;
@@ -62,21 +77,20 @@ public class VNPayConfig {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder sb = new StringBuilder();
-        Iterator<String> itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            String fieldName = itr.next();
+        boolean first = true;
+        for (String fieldName : fieldNames) {
             String fieldValue = fields.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                sb.append(fieldName);
-                sb.append("=");
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+                if (!first) {
+                    sb.append("&");
+                }
+                sb.append(fieldName).append("=");
                 try {
                     sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
                 } catch (UnsupportedEncodingException e) {
                     sb.append(fieldValue);
                 }
-                if (itr.hasNext()) {
-                    sb.append("&");
-                }
+                first = false;
             }
         }
         return hmacSHA512(VNP_HASH_SECRET, sb.toString());

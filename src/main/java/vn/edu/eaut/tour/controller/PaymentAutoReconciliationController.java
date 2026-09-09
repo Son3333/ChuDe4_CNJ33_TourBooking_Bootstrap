@@ -57,31 +57,46 @@ public class PaymentAutoReconciliationController extends HttpServlet {
             return;
         }
 
-        // 2. Tự động đối soát và xác nhận thanh toán (Auto-Reconcile)
+        // 2. Đối soát trạng thái thanh toán (Auto-Reconcile Check)
         if ("autoReconcile".equalsIgnoreCase(action)) {
             User user = (User) req.getSession().getAttribute("user");
             int userId = user != null ? user.getId() : 0;
+            boolean isAdmin = user != null && ("ADMIN".equalsIgnoreCase(user.getRole()) || "MANAGER".equalsIgnoreCase(user.getRole()));
+            boolean isStaffOverride = "true".equalsIgnoreCase(req.getParameter("staffOverride")) && isAdmin;
 
             String currentStatus = bookingDAO.getBookingStatus(bookingId);
             if ("CONFIRMED".equalsIgnoreCase(currentStatus) || "COMPLETED".equalsIgnoreCase(currentStatus)) {
                 responseData.put("success", true);
+                responseData.put("isPaid", true);
                 responseData.put("status", currentStatus);
-                responseData.put("message", "Đơn hàng đã được xác nhận thanh toán trước đó.");
+                responseData.put("message", "Đơn hàng đã được xác nhận thanh toán thành công!");
                 mapper.writeValue(resp.getWriter(), responseData);
                 return;
             }
 
-            boolean confirmed = bookingDAO.confirmPayment(bookingId);
-            if (confirmed) {
-                auditDAO.record(userId, bookingId, "AUTO_PAYMENT_RECONCILE", "PENDING", "CONFIRMED", req.getRemoteAddr());
-                responseData.put("success", true);
-                responseData.put("status", "CONFIRMED");
-                responseData.put("bookingId", bookingId);
-                responseData.put("message", "Hệ thống đã đối soát tự động thành công giao dịch Napas247 BIDV cho đơn #BK" + bookingId + "! Đơn hàng đã được tự động duyệt.");
-            } else {
-                responseData.put("success", false);
-                responseData.put("message", "Không thể tự động duyệt đơn hàng. Vui lòng kiểm tra lại trạng thái đơn.");
+            // Chỉ Admin hoặc Manager mới có quyền duyệt test nếu có tham số staffOverride
+            if (isStaffOverride) {
+                boolean confirmed = bookingDAO.confirmPayment(bookingId);
+                if (confirmed) {
+                    auditDAO.record(userId, bookingId, "STAFF_MANUAL_APPROVE", "PENDING", "CONFIRMED", req.getRemoteAddr());
+                    responseData.put("success", true);
+                    responseData.put("isPaid", true);
+                    responseData.put("status", "CONFIRMED");
+                    responseData.put("message", "Quản trị viên đã duyệt đơn #BK" + bookingId + " thành công.");
+                } else {
+                    responseData.put("success", false);
+                    responseData.put("isPaid", false);
+                    responseData.put("message", "Không thể duyệt đơn hàng này.");
+                }
+                mapper.writeValue(resp.getWriter(), responseData);
+                return;
             }
+
+            // Đối với khách hàng thông thường: Tuyệt đối không duyệt bừa khi chưa có tiền từ Webhook
+            responseData.put("success", false);
+            responseData.put("isPaid", false);
+            responseData.put("status", currentStatus != null ? currentStatus : "PENDING");
+            responseData.put("message", "Hệ thống chưa ghi nhận tiền về từ ngân hàng cho mã đơn #BK" + bookingId + ". Nếu bạn vừa quét mã chuyển khoản, xin vui lòng đợi 30 giây đến 1 phút để hệ thống ngân hàng đồng bộ tín hiệu, hoặc liên hệ nhân viên.");
             mapper.writeValue(resp.getWriter(), responseData);
             return;
         }
