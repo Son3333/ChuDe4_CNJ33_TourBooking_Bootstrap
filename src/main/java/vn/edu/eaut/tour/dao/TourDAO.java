@@ -6,7 +6,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 public class TourDAO {
+    private static volatile List<Tour> cachedDefaultTours = null;
+    private static volatile List<String> cachedCountries = null;
+    private static volatile long lastCacheTime = 0;
+    private static final long CACHE_TTL_MS = 180_000; // 3 minutes cache
+
+    public static void invalidateCache() {
+        cachedDefaultTours = null;
+        cachedCountries = null;
+        lastCacheTime = 0;
+    }
+
     public List<Tour> getAllTours() {
+        if (cachedDefaultTours != null && (System.currentTimeMillis() - lastCacheTime) < CACHE_TTL_MS) {
+            return new ArrayList<>(cachedDefaultTours);
+        }
         List<Tour> list = new ArrayList<>();
         String sql = "SELECT * FROM tours WHERE status = 'APPROVED'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -22,6 +36,17 @@ public class TourDAO {
     }
 
     public List<Tour> searchUserTours(String keyword, String origin, String destination, String duration, Double maxPrice, String country) {
+        boolean isDefault = (keyword == null || keyword.isBlank())
+                && (origin == null || origin.isBlank())
+                && (destination == null || destination.isBlank())
+                && (duration == null || duration.isBlank())
+                && (country == null || country.isBlank() || "all".equalsIgnoreCase(country.trim()))
+                && (maxPrice == null || maxPrice >= 100_000_000L);
+
+        if (isDefault && cachedDefaultTours != null && (System.currentTimeMillis() - lastCacheTime) < CACHE_TTL_MS) {
+            return new ArrayList<>(cachedDefaultTours);
+        }
+
         List<Tour> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM tours WHERE status = 'APPROVED'");
         List<Object> params = new ArrayList<>();
@@ -63,6 +88,10 @@ public class TourDAO {
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }
+        if (isDefault && !list.isEmpty()) {
+            cachedDefaultTours = new ArrayList<>(list);
+            lastCacheTime = System.currentTimeMillis();
+        }
         return list;
     }
 
@@ -132,22 +161,29 @@ public class TourDAO {
             ps.setString(1, status);
             ps.setString(2, note);
             ps.setInt(3, tourId);
-            return ps.executeUpdate() > 0;
+            boolean ok = ps.executeUpdate() > 0;
+            if (ok) invalidateCache();
+            return ok;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
     public List<String> getDistinctCountries() {
+        if (cachedCountries != null) return new ArrayList<>(cachedCountries);
         List<String> list = new ArrayList<>();
         String sql = "SELECT DISTINCT country FROM tours WHERE country IS NOT NULL AND country <> '' ORDER BY CASE WHEN country = 'Việt Nam' THEN 0 ELSE 1 END, country ASC";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(rs.getString(1));
         } catch (Exception e) { e.printStackTrace(); }
+        if (!list.isEmpty()) cachedCountries = new ArrayList<>(list);
         return list;
     }
 
     public boolean delete(int id) {
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement("DELETE FROM tours WHERE id = ? AND NOT EXISTS (SELECT 1 FROM bookings WHERE tour_id = ?)")) {
-            ps.setInt(1, id); ps.setInt(2, id); return ps.executeUpdate() == 1;
+            ps.setInt(1, id); ps.setInt(2, id);
+            boolean ok = ps.executeUpdate() == 1;
+            if (ok) invalidateCache();
+            return ok;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
