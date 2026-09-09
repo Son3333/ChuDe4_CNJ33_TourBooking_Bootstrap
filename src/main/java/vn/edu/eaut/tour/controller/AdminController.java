@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @WebServlet("/admin")
 public class AdminController extends HttpServlet {
-    private static final int PAGE_SIZE = 5;
+    private static final int PAGE_SIZE = 10;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

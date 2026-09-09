@@ -370,18 +370,60 @@
                                     </table>
                                 </div>
 
-                                <%-- Phân trang --%>
-                                    <c:if test="${totalPages > 1}">
-                                        <nav class="mt-3">
-                                            <ul class="pagination pagination-sm justify-content-center mb-0">
-                                                <c:forEach var="p" begin="1" end="${totalPages}">
-                                                    <li class="page-item ${p == page ? 'active' : ''}">
-                                                        <a class="page-link"
-                                                            href="admin?page=${p}&q=${keyword}&availability=${availability}#tours">${p}</a>
-                                                    </li>
-                                                </c:forEach>
-                                            </ul>
-                                        </nav>
-                                    </c:if>
+                                 <%-- Phân trang chuẩn giao diện chuyên nghiệp --%>
+                                 <c:if test="${totalPages > 1}">
+                                     <nav class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                         <small class="text-secondary fw-semibold">
+                                             Hiển thị trang <strong>${page}</strong> / <strong>${totalPages}</strong>
+                                         </small>
+                                         
+                                         <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center">
+                                             <%-- Nút Trang Trước --%>
+                                             <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                                                 <a class="page-link" href="admin?page=${page - 1}&q=${keyword}&availability=${availability}#tours" aria-label="Trang trước">
+                                                     <i class="bi bi-chevron-left"></i>
+                                                 </a>
+                                             </li>
+
+                                             <%-- Trang đầu (1) --%>
+                                             <li class="page-item ${page == 1 ? 'active' : ''}">
+                                                 <a class="page-link" href="admin?page=1&q=${keyword}&availability=${availability}#tours">1</a>
+                                             </li>
+
+                                             <%-- Dấu ... bên trái nếu page > 4 --%>
+                                             <c:if test="${page > 4}">
+                                                 <li class="page-item disabled"><span class="page-link">...</span></li>
+                                             </c:if>
+
+                                             <%-- Các trang ở giữa quanh trang hiện tại --%>
+                                             <c:forEach var="p" begin="2" end="${totalPages - 1}">
+                                                 <c:if test="${p >= page - 2 && p <= page + 2}">
+                                                     <li class="page-item ${p == page ? 'active' : ''}">
+                                                         <a class="page-link" href="admin?page=${p}&q=${keyword}&availability=${availability}#tours">${p}</a>
+                                                     </li>
+                                                 </c:if>
+                                             </c:forEach>
+
+                                             <%-- Dấu ... bên phải nếu page < totalPages - 3 --%>
+                                             <c:if test="${page < totalPages - 3}">
+                                                 <li class="page-item disabled"><span class="page-link">...</span></li>
+                                             </c:if>
+
+                                             <%-- Trang cuối (totalPages) --%>
+                                             <c:if test="${totalPages > 1}">
+                                                 <li class="page-item ${page == totalPages ? 'active' : ''}">
+                                                     <a class="page-link" href="admin?page=${totalPages}&q=${keyword}&availability=${availability}#tours">${totalPages}</a>
+                                                 </li>
+                                             </c:if>
+
+                                             <%-- Nút Trang Sau --%>
+                                             <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                                                 <a class="page-link" href="admin?page=${page + 1}&q=${keyword}&availability=${availability}#tours" aria-label="Trang sau">
+                                                     <i class="bi bi-chevron-right"></i>
+                                                 </a>
+                                             </li>
+                                         </ul>
+                                     </nav>
+                                 </c:if>
                 </div>
             </section>
