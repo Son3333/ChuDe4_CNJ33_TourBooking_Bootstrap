@@ -1,0 +1,28 @@
+# Compiled class files
+target/
+*.class
+
+# IDE and Project files
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# Tomcat runtime & logs
+.smarttomcat/
+logs/
+temp/
+work/
+webapps/
+conf/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and secrets
+*.log
+
