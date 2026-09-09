@@ -111,14 +111,46 @@
                         }
 
                         .side {
-                            width: 100%;
-                            min-height: auto;
-                            position: static;
+                            width: 100% !important;
+                            min-height: auto !important;
+                            position: sticky !important;
+                            top: 0 !important;
+                            z-index: 100;
+                            display: flex !important;
+                            overflow-x: auto !important;
+                            white-space: nowrap !important;
+                            flex-wrap: nowrap !important;
+                            gap: 8px !important;
+                            padding: 10px 14px !important;
+                            background: #0f172a !important;
+                            scrollbar-width: none !important;
+                            border-bottom: 1px solid #1e293b;
+                        }
+
+                        .side::-webkit-scrollbar {
+                            display: none;
                         }
 
                         .side a {
-                            display: inline-flex;
-                            padding: 8px 12px;
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            gap: 6px !important;
+                            padding: 6px 14px !important;
+                            border-radius: 20px !important;
+                            font-size: 0.84rem !important;
+                            flex-shrink: 0 !important;
+                            background: rgba(255, 255, 255, 0.08) !important;
+                            color: #cbd5e1 !important;
+                        }
+
+                        .side a.active {
+                            background: #2563eb !important;
+                            color: #ffffff !important;
+                            font-weight: 700 !important;
+                        }
+
+                        .main {
+                            padding: 1rem !important;
                         }
                     }
                 </style>

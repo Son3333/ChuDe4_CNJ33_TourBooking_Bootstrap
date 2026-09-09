@@ -55,6 +55,11 @@
             border: 1px dashed #cbd5e1;
             border-radius: 8px;
         }
+        @media (max-width: 768px) {
+            body { padding: 1rem 0 !important; }
+            .contract-paper { padding: 1.25rem 1rem !important; margin: 0.5rem auto !important; border-radius: 8px; }
+            .contract-title { font-size: 1.2rem !important; }
+        }
         @media print {
             body { background: #fff !important; }
             .contract-paper { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; padding: 1.5cm !important; }

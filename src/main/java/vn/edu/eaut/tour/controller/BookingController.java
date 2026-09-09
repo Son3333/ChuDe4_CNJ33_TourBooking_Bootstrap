@@ -12,7 +12,7 @@ import vn.edu.eaut.tour.model.User;
 import java.io.IOException;
 import java.util.UUID;
 
-@WebServlet("/user/bookings")
+@WebServlet(urlPatterns = {"/user/bookings", "/my-bookings"})
 public class BookingController extends HttpServlet {
     private BookingDAO bookingDAO = new BookingDAO();
     private TourDAO tourDAO = new TourDAO();

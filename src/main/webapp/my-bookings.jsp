@@ -183,6 +183,15 @@
             padding: 1rem 1.5rem;
         }
 
+        @media (max-width: 768px) {
+            body { padding-bottom: 75px; }
+            .booking-card { padding: 1rem !important; }
+            .step-circle { width: 32px !important; height: 32px !important; font-size: 0.8rem !important; margin-bottom: 0.25rem !important; }
+            .step-title { font-size: 0.68rem !important; }
+            .step-item { padding: 0 0.25rem !important; }
+            .eticket-header, .eticket-body, .eticket-stub { padding: 1rem !important; }
+        }
+
         @media print {
             body * { visibility: hidden !important; }
             .printable-ticket-area, .printable-ticket-area * { visibility: visible !important; }
@@ -287,7 +296,7 @@
                             </div>
 
                             <h3 class="h5 fw-bold text-dark mb-2">${b.tour.name}</h3>
-                            <div class="d-flex gap-4 text-secondary small mb-3">
+                            <div class="d-flex flex-wrap gap-2 gap-sm-4 text-secondary small mb-3">
                                 <span><i class="bi bi-calendar3 text-primary"></i> Ngày KH: <strong>${b.tour.startDate}</strong></span>
                                 <span><i class="bi bi-cash-stack text-success"></i> Giá tour: <strong class="text-danger fs-6"><fmt:formatNumber value="${b.tour.price}" type="number" maxFractionDigits="0"/> VNĐ</strong></span>
                                 <c:if test="${not empty b.paymentStatus}">

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <aside class="side flex-shrink-0 shadow-sm">
-    <div class="text-uppercase small text-secondary px-3 py-3 fw-bold tracking-wider">
+    <div class="text-uppercase small text-secondary px-3 py-3 fw-bold tracking-wider d-none d-md-block">
         <c:choose>
             <c:when test="${sessionScope.user.role == 'ADMIN'}">Bảo trì & Kỹ thuật</c:when>
             <c:when test="${sessionScope.user.role == 'MANAGER'}">Quản lý Kinh doanh</c:when>

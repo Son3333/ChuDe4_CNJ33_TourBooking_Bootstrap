@@ -242,6 +242,27 @@
             background: #fff;
         }
         .tour-detail-modal .sticky-booking-box { position: static; }
+
+        @media (max-width: 768px) {
+            body { padding-bottom: 75px; }
+            .sub-hero { padding: 1.75rem 0; border-radius: 0 0 16px 16px; }
+            .card-img-wrapper { height: 185px; }
+            .tour-card .card-body { padding: 1rem !important; }
+            .tour-detail-modal { padding: 0.25rem; }
+            .tour-detail-modal .modal-dialog {
+                width: calc(100vw - 12px) !important;
+                max-width: 100% !important;
+                margin: 6px auto !important;
+            }
+            .tour-detail-modal .modal-content {
+                max-height: calc(100vh - 12px) !important;
+                border-radius: 16px !important;
+            }
+            .tour-detail-modal .modal-body { padding: 1rem !important; }
+            .modal-banner-box { height: 200px !important; }
+            .modal-header { padding: 0.75rem 1rem !important; }
+            .modal-header .modal-title { font-size: 1rem !important; }
+        }
     </style>
 </head>
 <body>
@@ -482,7 +503,7 @@
                     <!-- Cột Trái (70%): Banner, Tiện ích, Mô tả & Accordion Lịch trình -->
                     <div class="col-lg-8">
                         <!-- Banner Ảnh Tour có Overlay Badge -->
-                        <div class="position-relative rounded-4 overflow-hidden mb-2 shadow-sm" style="height: 340px;">
+                        <div class="position-relative rounded-4 overflow-hidden mb-2 shadow-sm modal-banner-box" style="height: 340px;">
                             <img id="modalTourImg" src="https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80" alt="Tour Detail" class="w-100 h-100" style="object-fit: cover;" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80';">
                             <div class="position-absolute top-0 start-0 p-3 d-flex gap-2">
                                 <span class="badge bg-dark bg-opacity-75 text-white backdrop-blur px-3 py-2 rounded-pill"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Điểm đến hấp dẫn</span>
@@ -511,28 +532,28 @@
 
                         <!-- Thanh Tiện ích Nổi bật (Features Bar) -->
                         <div class="row g-2 mb-4 text-center">
-                            <div class="col-3">
+                            <div class="col-6 col-sm-3">
                                 <div class="feature-chip">
                                     <i class="bi bi-bus-front text-primary fs-5 mb-1 d-block"></i>
                                     <small class="fw-bold d-block text-dark">Xe Du Lịch</small>
                                     <span class="text-secondary extra-small">Đời mới, máy lạnh</span>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-6 col-sm-3">
                                 <div class="feature-chip">
                                     <i class="bi bi-building text-warning fs-5 mb-1 d-block"></i>
                                     <small class="fw-bold d-block text-dark">Khách Sạn</small>
                                     <span class="text-secondary extra-small">3 - 5 Sao sang trọng</span>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-6 col-sm-3">
                                 <div class="feature-chip">
                                     <i class="bi bi-cup-hot text-danger fs-5 mb-1 d-block"></i>
                                     <small class="fw-bold d-block text-dark">Bữa Ăn</small>
                                     <span class="text-secondary extra-small">Đặc sản địa phương</span>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-6 col-sm-3">
                                 <div class="feature-chip">
                                     <i class="bi bi-person-badge text-success fs-5 mb-1 d-block"></i>
                                     <small class="fw-bold d-block text-dark">HDV Chu Đáo</small>

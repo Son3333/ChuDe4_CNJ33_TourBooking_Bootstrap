@@ -213,6 +213,32 @@
                 margin-bottom: 0.75rem;
             }
         }
+        @media (max-width: 768px) {
+            .hero {
+                min-height: auto;
+                padding: 2.5rem 0 3rem 0;
+            }
+            .hero-content {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.85rem;
+            }
+            .hero p.lead {
+                font-size: 0.95rem;
+            }
+            .search-box {
+                padding: 1rem;
+                border-radius: 14px;
+            }
+            .card-img-wrapper {
+                height: 180px;
+            }
+            .section-title {
+                font-size: 1.35rem;
+            }
+        }
     </style>
 </head>
 <body>

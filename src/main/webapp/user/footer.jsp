@@ -78,56 +78,61 @@
 <!-- Mobile Responsive Bottom Navigation Bar (< 768px) -->
 <style>
     @media (max-width: 768px) {
-        body { padding-bottom: 65px; }
-        .live-chat-root { bottom: 72px !important; }
-        .admin-bubbles-container { bottom: 72px !important; }
-        .chat-panel { bottom: 130px !important; max-height: calc(100vh - 150px) !important; }
+        body { padding-bottom: 72px !important; }
+        .mobile-bottom-nav {
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            border-top: 1px solid #e2e8f0;
+        }
     }
     .mobile-nav-item {
         color: #64748b;
         text-decoration: none;
         transition: color 0.15s;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     .mobile-nav-item:hover, .mobile-nav-item.active {
-        color: #2563eb;
+        color: #e76f3c;
     }
 </style>
-<nav class="mobile-bottom-nav d-md-none fixed-bottom bg-white border-top shadow-lg py-1 px-2 d-flex justify-content-around align-items-center" style="z-index: 2000; height: 58px;">
+<nav class="mobile-bottom-nav d-md-none fixed-bottom bg-white py-1 px-2 d-flex justify-content-around align-items-center" style="z-index: 2000; height: 60px;">
     <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-nav-item text-center">
         <i class="bi bi-house-door fs-5 d-block lh-1 mb-1"></i>
-        <span style="font-size: 0.68rem; font-weight: 600;">Trang chủ</span>
+        <span style="font-size: 0.7rem; font-weight: 600;">Trang chủ</span>
     </a>
     <a href="${pageContext.request.contextPath}/tours" class="mobile-nav-item text-center">
         <i class="bi bi-compass fs-5 d-block lh-1 mb-1"></i>
-        <span style="font-size: 0.68rem; font-weight: 600;">Khám phá</span>
+        <span style="font-size: 0.7rem; font-weight: 600;">Khám phá</span>
     </a>
-    <button type="button" class="btn p-0 text-center border-0 bg-transparent" onclick="document.getElementById('userChatLauncher') ? document.getElementById('userChatLauncher').click() : window.location.href='${pageContext.request.contextPath}/tours'">
-        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm" style="width: 40px; height: 40px; background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: #fff; margin-top: -16px; border: 3px solid #fff;">
+    <button type="button" class="btn p-0 text-center border-0 bg-transparent flex-1" onclick="document.getElementById('userChatLauncher') ? document.getElementById('userChatLauncher').click() : window.location.href='${pageContext.request.contextPath}/tours'">
+        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow" style="width: 44px; height: 44px; background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: #fff; margin-top: -18px; border: 3px solid #fff;">
             <i class="bi bi-robot fs-5"></i>
         </div>
-        <span style="font-size: 0.68rem; font-weight: 700; color: #0d9488;">AI Tư vấn</span>
+        <span style="font-size: 0.7rem; font-weight: 700; color: #0d9488;">AI Tư vấn</span>
     </button>
-    <a href="${pageContext.request.contextPath}/my-bookings" class="mobile-nav-item text-center">
+    <a href="${pageContext.request.contextPath}/user/bookings" class="mobile-nav-item text-center">
         <i class="bi bi-ticket-perforated fs-5 d-block lh-1 mb-1"></i>
-        <span style="font-size: 0.68rem; font-weight: 600;">Vé của tôi</span>
+        <span style="font-size: 0.7rem; font-weight: 600;">Vé của tôi</span>
     </a>
     <c:choose>
         <c:when test="${not empty sessionScope.user && (sessionScope.user.role == 'ADMIN' || sessionScope.user.role == 'MANAGER' || sessionScope.user.role == 'STAFF')}">
             <a href="${pageContext.request.contextPath}/admin" class="mobile-nav-item text-center text-danger">
                 <i class="bi bi-shield-lock-fill fs-5 d-block lh-1 mb-1"></i>
-                <span style="font-size: 0.68rem; font-weight: 700;">Quản trị</span>
+                <span style="font-size: 0.7rem; font-weight: 700;">Quản trị</span>
             </a>
         </c:when>
         <c:when test="${not empty sessionScope.user}">
-            <a href="${pageContext.request.contextPath}/my-bookings" class="mobile-nav-item text-center">
+            <a href="${pageContext.request.contextPath}/user/bookings" class="mobile-nav-item text-center">
                 <i class="bi bi-person-circle fs-5 d-block lh-1 mb-1"></i>
-                <span style="font-size: 0.68rem; font-weight: 600;">Tài khoản</span>
+                <span style="font-size: 0.7rem; font-weight: 600;">Tài khoản</span>
             </a>
         </c:when>
         <c:otherwise>
             <a href="${pageContext.request.contextPath}/login" class="mobile-nav-item text-center">
                 <i class="bi bi-person fs-5 d-block lh-1 mb-1"></i>
-                <span style="font-size: 0.68rem; font-weight: 600;">Đăng nhập</span>
+                <span style="font-size: 0.7rem; font-weight: 600;">Đăng nhập</span>
             </a>
         </c:otherwise>
     </c:choose>

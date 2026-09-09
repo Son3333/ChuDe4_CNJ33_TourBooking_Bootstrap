@@ -218,6 +218,72 @@
         background: #f1f5f9; padding: 8px 16px; border-bottom: 1px solid #e2e8f0;
         display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;
     }
+
+    /* Mobile Responsive Rules */
+    @media (max-width: 768px) {
+        .live-chat-root {
+            right: 14px !important;
+            bottom: 68px !important;
+            gap: 8px !important;
+        }
+        .fb-floating-btn {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 1.2rem !important;
+        }
+        .user-chat-launcher {
+            padding: 0 !important;
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 50% !important;
+            justify-content: center !important;
+        }
+        .user-chat-launcher .launcher-text,
+        .user-chat-launcher .ai-pulse-badge {
+            display: none !important;
+        }
+        .user-chat-launcher #userUnreadBadge {
+            position: absolute !important;
+            top: -2px !important;
+            right: -2px !important;
+        }
+        .chat-panel {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
+            z-index: 99999 !important;
+            box-shadow: none !important;
+        }
+        .admin-bubbles-container {
+            right: 14px !important;
+            bottom: 68px !important;
+        }
+        .admin-master-bubble {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 1.3rem !important;
+        }
+        .admin-chat-hub-panel {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
+            z-index: 99999 !important;
+        }
+    }
 </style>
 
 <div id="liveChatApp" 
@@ -297,7 +363,7 @@
                 <%-- Nút bấm mở chat Nhân viên AI Hịn Hò & Live Chat --%>
                 <button type="button" id="userChatLauncher" class="user-chat-launcher" title="Bấm để chat với Nhân viên AI Hịn Hò">
                     <i class="bi bi-robot fs-5"></i>
-                    <span>Nhân viên AI Hịn Hò</span>
+                    <span class="launcher-text">Nhân viên AI Hịn Hò</span>
                     <span class="ai-pulse-badge">Tư vấn 24/7</span>
                     <span id="userUnreadBadge" class="badge-unread d-none">1</span>
                 </button>
