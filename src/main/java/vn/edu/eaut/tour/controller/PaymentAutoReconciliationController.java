@@ -127,27 +127,34 @@ public class PaymentAutoReconciliationController extends HttpServlet {
             String rawJson = sb.toString();
             JsonNode root = mapper.readTree(rawJson);
 
-            // Tìm nội dung chuyển khoản từ các trường phổ biến (content, description, memo)
-            String content = "";
-            if (root.has("content")) content = root.get("content").asText();
-            else if (root.has("description")) content = root.get("description").asText();
-            else if (root.has("memo")) content = root.get("memo").asText();
+            // Gộp tất cả các trường có thể chứa nội dung chuyển khoản từ SePay / Casso
+            StringBuilder allText = new StringBuilder();
+            if (root.has("content")) allText.append(" ").append(root.get("content").asText());
+            if (root.has("description")) allText.append(" ").append(root.get("description").asText());
+            if (root.has("code")) allText.append(" ").append(root.get("code").asText());
+            if (root.has("referenceCode")) allText.append(" ").append(root.get("referenceCode").asText());
 
-            // Tìm mã đơn hàng dạng BK<số>
-            Pattern pattern = Pattern.compile("BK(\\d+)", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(content);
+            // Tìm mã đơn hàng dạng BK<số> (ví dụ BK67 hoặc BK 67)
+            Pattern pattern = Pattern.compile("BK\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(allText.toString());
 
             if (matcher.find()) {
                 int bookingId = Integer.parseInt(matcher.group(1));
                 boolean ok = bookingDAO.confirmPayment(bookingId);
                 if (ok) {
-                    auditDAO.record(0, bookingId, "WEBHOOK_AUTO_CONFIRM", "PENDING", "CONFIRMED", req.getRemoteAddr());
+                    auditDAO.record(0, bookingId, "SEPAY_WEBHOOK_AUTO_CONFIRM", "PENDING", "CONFIRMED", req.getRemoteAddr());
                     result.put("success", true);
                     result.put("message", "Đã tự động xác nhận đơn BK" + bookingId);
                     mapper.writeValue(resp.getWriter(), result);
                     return;
                 }
             }
+
+            // Hỗ trợ test webhook từ SePay (SePay thường gửi ping test không có BK)
+            result.put("success", true);
+            result.put("message", "Đã nhận tín hiệu Webhook từ SePay thành công!");
+            mapper.writeValue(resp.getWriter(), result);
+            return;
         } catch (Exception e) {
             e.printStackTrace();
         }
