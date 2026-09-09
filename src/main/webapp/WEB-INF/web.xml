@@ -14,6 +14,14 @@
         <servlet-name>oauthController</servlet-name>
         <url-pattern>/oauth/*</url-pattern>
     </servlet-mapping>
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+            <trim-directive-whitespaces>true</trim-directive-whitespaces>
+            <default-content-type>text/html; charset=UTF-8</default-content-type>
+        </jsp-property-group>
+    </jsp-config>
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>

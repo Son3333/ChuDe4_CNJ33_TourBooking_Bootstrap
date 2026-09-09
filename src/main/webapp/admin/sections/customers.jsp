@@ -13,6 +13,7 @@
                                 <tr>
                                     <th>Họ tên</th>
                                     <th>Tài khoản</th>
+                                    <th>Vai trò</th>
                                     <th>Số đơn</th>
                                     <th>Tổng chi tiêu</th>
                                     <th>Trạng thái</th>
@@ -24,6 +25,28 @@
                                     <tr>
                                         <td class="fw-semibold">${u.name}</td>
                                         <td>${u.username}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${sessionScope.user.admin && u.role != 'ADMIN'}">
+                                                    <form method="post" action="admin" class="d-inline">
+                                                        <input type="hidden" name="tab" value="customers">
+                                                        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                                                        <input type="hidden" name="action" value="updateRole">
+                                                        <input type="hidden" name="id" value="${u.id}">
+                                                        <select name="role" class="form-select form-select-sm d-inline-block w-auto py-0 px-2 fw-semibold" onchange="this.form.submit()" style="font-size: 0.82rem;">
+                                                            <option value="USER" ${u.role == 'USER' ? 'selected' : ''}>USER (Khách)</option>
+                                                            <option value="STAFF" ${u.role == 'STAFF' ? 'selected' : ''}>STAFF (Nhân viên)</option>
+                                                            <option value="MANAGER" ${u.role == 'MANAGER' ? 'selected' : ''}>MANAGER (Quản lý)</option>
+                                                        </select>
+                                                    </form>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge ${u.role == 'ADMIN' ? 'bg-danger' : (u.role == 'MANAGER' ? 'bg-warning text-dark' : (u.role == 'STAFF' ? 'bg-info text-dark' : 'bg-secondary'))}">
+                                                        ${u.role}
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td>${u.bookings}</td>
                                         <td>
                                             <fmt:formatNumber value="${u.spent}" type="number" maxFractionDigits="0" />

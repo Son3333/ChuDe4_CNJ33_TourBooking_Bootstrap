@@ -155,4 +155,13 @@ public class UserDAO {
             return ps.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
+
+    public boolean updateRole(int id, String role) {
+        String sql = "UPDATE users SET role = ? WHERE id = ? AND role != 'ADMIN'";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role.toUpperCase());
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
 }

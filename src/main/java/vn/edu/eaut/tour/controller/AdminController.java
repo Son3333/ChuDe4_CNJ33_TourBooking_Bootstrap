@@ -185,6 +185,9 @@ public class AdminController extends HttpServlet {
                 handleRefundComplete(req, adminDAO, auditDAO, user);
             } else if ("toggleUser".equals(action)) {
                 handleToggleUser(req, adminDAO, auditDAO, user);
+            } else if ("updateRole".equals(action)) {
+                handleUpdateRole(req, auditDAO, user);
+                tab = "customers";
             } else if ("review".equals(action)) {
                 handleReview(req, adminDAO, auditDAO, user);
             } else if ("delete".equals(action)) {
@@ -236,6 +239,20 @@ public class AdminController extends HttpServlet {
         adminDAO.toggleUser(targetUserId);
         auditDAO.record(user.getId(), user.getRole(), "users", targetUserId, "TOGGLE_USER_STATUS", "", "USER_ID:" + targetUserId, req.getRemoteAddr());
         req.getSession().setAttribute("success", "Cập nhật trạng thái tài khoản thành công!");
+    }
+
+    private void handleUpdateRole(HttpServletRequest req, AuditDAO auditDAO, User user) throws Exception {
+        if (!user.isAdmin()) {
+            req.getSession().setAttribute("error", "Chỉ Quản trị viên (Admin) mới có quyền phân quyền!");
+            return;
+        }
+        int targetUserId = parseInt(req.getParameter("id"));
+        String newRole = req.getParameter("role");
+        if (newRole != null && (newRole.equals("USER") || newRole.equals("STAFF") || newRole.equals("MANAGER"))) {
+            new UserDAO().updateRole(targetUserId, newRole);
+            auditDAO.record(user.getId(), user.getRole(), "users", targetUserId, "UPDATE_ROLE", "", newRole, req.getRemoteAddr());
+            req.getSession().setAttribute("success", "Phân quyền tài khoản thành công sang vai trò: " + newRole + "!");
+        }
     }
 
     private void handleReview(HttpServletRequest req, AdminDAO adminDAO, AuditDAO auditDAO, User user) throws Exception {
