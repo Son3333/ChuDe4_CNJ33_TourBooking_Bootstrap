@@ -14,4 +14,4 @@ ENV JAVA_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 EXPOSE 8080 10000
-CMD sed -i "s/port=\"8080\"/port=\"${PORT:-8080}\"/g" conf/server.xml && catalina.sh run
+CMD sed -i 's/<Server port="8005"/<Server port="-1"/' conf/server.xml && sed -i "s/port=\"8080\"/port=\"${PORT:-8080}\"/g" conf/server.xml && catalina.sh run
