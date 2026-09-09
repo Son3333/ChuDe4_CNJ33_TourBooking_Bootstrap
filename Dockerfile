@@ -10,7 +10,7 @@ RUN mvn clean package -DskipTests -Dfile.encoding=UTF-8
 FROM tomcat:10.1-jdk17-temurin
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
-ENV JAVA_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Xms128m -Xmx320m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+ENV JAVA_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.timezone=Asia/Ho_Chi_Minh -Xms128m -Xmx320m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 EXPOSE 8080 10000

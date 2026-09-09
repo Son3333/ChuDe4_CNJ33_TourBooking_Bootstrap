@@ -414,8 +414,14 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="alert alert-info py-2 small mb-2">
-                                                        <i class="bi bi-info-circle-fill me-1"></i> Quét mã VietQR hoặc bấm chuyển sang cổng thanh toán trực tuyến VNPay.
+                                                    <div class="alert alert-primary py-2 px-3 small mb-2 d-flex align-items-center justify-content-between flex-wrap gap-2 border-0 shadow-sm" style="background: #eef2ff;">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
+                                                            <span class="text-primary fw-semibold">Hệ thống đang tự động lắng nghe giao dịch chuyển khoản...</span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 shadow-sm fw-bold" onclick="showPaymentSuccessToast('BK${b.id}', ${b.id})">
+                                                            <i class="bi bi-arrow-repeat me-1"></i> Kiểm tra & Duyệt ngay
+                                                        </button>
                                                     </div>
 
                                                     <!-- VNPay Test Card Info Hint -->
@@ -678,6 +684,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    let activePaymentPollInterval = null;
+
+    function startPaymentPolling(bookingId, bookingCode) {
+        stopPaymentPolling();
+        activePaymentPollInterval = setInterval(async () => {
+            try {
+                const res = await fetch('${pageContext.request.contextPath}/payment/check?action=checkStatus&bookingId=' + bookingId);
+                const data = await res.json();
+                if (data && data.isPaid) {
+                    stopPaymentPolling();
+                    closeModal('payModal_' + bookingId);
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            iconColor: '#10b981',
+                            title: '<h4 class="fw-bold text-success mb-1">Đã Nhận Tiền & Tự Động Duyệt Đơn!</h4>',
+                            html: '<p class="text-secondary mb-2">Hệ thống đã khớp lệnh chuyển khoản cho đơn <strong>#' + bookingCode + '</strong> thành công!</p>' +
+                                  '<span class="badge bg-success px-3 py-2 fs-6">ĐÃ XÁC NHẬN (CONFIRMED)</span>',
+                            confirmButtonText: '<i class="bi bi-ticket-perforated-fill me-1"></i> Xem vé & Hợp đồng ngay',
+                            customClass: {
+                                confirmButton: 'btn btn-success rounded-pill px-4 py-2'
+                            }
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert('Thanh toán thành công! Đơn hàng ' + bookingCode + ' đã được tự động duyệt.');
+                        window.location.reload();
+                    }
+                }
+            } catch (e) {
+                console.error('Lỗi kiểm tra giao dịch tự động:', e);
+            }
+        }, 2500);
+    }
+
+    function stopPaymentPolling() {
+        if (activePaymentPollInterval) {
+            clearInterval(activePaymentPollInterval);
+            activePaymentPollInterval = null;
+        }
+    }
+
     function openModal(modalId) {
         const modalEl = document.getElementById(modalId);
         if (!modalEl) return;
@@ -695,6 +744,11 @@
             modalEl.classList.add('show');
             modalEl.style.display = 'block';
         }
+
+        if (modalId.startsWith('payModal_')) {
+            const bId = modalId.replace('payModal_', '');
+            startPaymentPolling(bId, 'BK' + bId);
+        }
     }
 
     function closeModal(modalId) {
@@ -711,6 +765,10 @@
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
         } catch (err) {
             console.error('Error closing modal:', err);
+        }
+
+        if (modalId.startsWith('payModal_')) {
+            stopPaymentPolling();
         }
     }
 

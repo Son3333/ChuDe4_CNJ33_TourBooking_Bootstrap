@@ -92,8 +92,10 @@ public class VNPayController extends HttpServlet {
         vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        TimeZone vnTz = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+        Calendar cld = Calendar.getInstance(vnTz);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        formatter.setTimeZone(vnTz);
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
