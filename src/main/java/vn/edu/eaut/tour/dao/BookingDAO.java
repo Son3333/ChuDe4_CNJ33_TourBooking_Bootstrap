@@ -32,7 +32,7 @@ public class BookingDAO {
                 }
 
                 int bookingId = -1;
-                try (PreparedStatement booking = conn.prepareStatement("INSERT INTO bookings (user_id, tour_id, status, payment_status) VALUES (?, ?, 'CONFIRMED', 'PAID')", Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement booking = conn.prepareStatement("INSERT INTO bookings (user_id, tour_id, status, payment_status) VALUES (?, ?, 'PENDING', 'PENDING')", Statement.RETURN_GENERATED_KEYS)) {
                     booking.setInt(1, userId);
                     booking.setInt(2, tourId);
                     booking.executeUpdate();
