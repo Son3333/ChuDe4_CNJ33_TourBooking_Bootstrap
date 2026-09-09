@@ -473,13 +473,14 @@
     </div>
 
     <!-- Phân Trang Danh Sách Tour (Pagination Controls) -->
-    <div class="d-flex justify-content-center align-items-center gap-2 mt-5" id="toursPaginationWrap">
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-5 flex-wrap" id="toursPaginationWrap">
         <button class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm" id="prevPageBtn" onclick="changeTourPage(-1)">
-            <i class="bi bi-chevron-left me-1"></i> Trang trước
+            <i class="bi bi-chevron-left me-1"></i> <span class="d-none d-sm-inline">Trang trước</span>
         </button>
-        <div id="pageNumbersContainer" class="d-flex gap-1"></div>
+        <span class="d-sm-none badge bg-white text-dark px-3 py-2 border shadow-sm align-self-center fw-bold" id="mobilePageIndicator">Trang 1 / 1</span>
+        <div id="pageNumbersContainer" class="d-none d-sm-flex align-items-center gap-1"></div>
         <button class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm" id="nextPageBtn" onclick="changeTourPage(1)">
-            Trang sau <i class="bi bi-chevron-right ms-1"></i>
+            <span class="d-none d-sm-inline">Trang sau</span> <i class="bi bi-chevron-right ms-1"></i>
         </button>
     </div>
 </main>
@@ -896,7 +897,7 @@
     }
 
     // Lọc Tour theo Thanh Trượt Giá & Phân Trang
-    const TOURS_PER_PAGE = 6;
+    const TOURS_PER_PAGE = 9;
     let currentTourPage = 1;
 
     function formatVND(amount) {
@@ -964,6 +965,7 @@
         const prevBtn = document.getElementById('prevPageBtn');
         const nextBtn = document.getElementById('nextPageBtn');
         const pageNumbersContainer = document.getElementById('pageNumbersContainer');
+        const mobileIndicator = document.getElementById('mobilePageIndicator');
         const paginationWrap = document.getElementById('toursPaginationWrap');
 
         if (matchedCols.length <= TOURS_PER_PAGE) {
@@ -972,23 +974,46 @@
             if (paginationWrap) paginationWrap.style.display = 'flex';
             if (prevBtn) prevBtn.disabled = (currentTourPage <= 1);
             if (nextBtn) nextBtn.disabled = (currentTourPage >= totalPages);
+            if (mobileIndicator) {
+                mobileIndicator.innerText = 'Trang ' + currentTourPage + ' / ' + totalPages;
+            }
 
             if (pageNumbersContainer) {
                 pageNumbersContainer.innerHTML = '';
-                for (let p = 1; p <= totalPages; p++) {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'btn btn-sm rounded-pill px-3 shadow-sm ' + (p === currentTourPage ? 'btn-primary' : 'btn-outline-primary');
-                    btn.innerText = p;
-                    btn.onclick = (function(page) {
-                        return function() {
-                            currentTourPage = page;
+                
+                // Thuật toán hiển thị trang gọn gàng có dấu "..."
+                const pages = [];
+                if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                    if (currentTourPage <= 4) {
+                        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+                    } else if (currentTourPage >= totalPages - 3) {
+                        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                    } else {
+                        pages.push(1, '...', currentTourPage - 1, currentTourPage, currentTourPage + 1, '...', totalPages);
+                    }
+                }
+
+                pages.forEach(p => {
+                    if (p === '...') {
+                        const span = document.createElement('span');
+                        span.className = 'px-2 py-1 text-secondary fw-bold align-self-center';
+                        span.innerText = '...';
+                        pageNumbersContainer.appendChild(span);
+                    } else {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-sm rounded-pill px-3 shadow-sm ' + (p === currentTourPage ? 'btn-primary' : 'btn-outline-primary');
+                        btn.innerText = p;
+                        btn.onclick = function() {
+                            currentTourPage = p;
                             filterAndPaginateTours();
                             window.scrollTo({ top: 350, behavior: 'smooth' });
                         };
-                    })(p);
-                    pageNumbersContainer.appendChild(btn);
-                }
+                        pageNumbersContainer.appendChild(btn);
+                    }
+                });
             }
         }
     }
