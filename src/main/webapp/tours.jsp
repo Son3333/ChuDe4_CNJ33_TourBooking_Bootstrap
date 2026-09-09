@@ -355,10 +355,10 @@
 
                         <c:choose>
                             <c:when test="${not empty tour.imageUrl}">
-                                <img src="${tour.imageUrl}" alt="${tour.name}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80';">
+                                <img src="${tour.imageUrl}" alt="${tour.name}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80';">
                             </c:when>
                             <c:otherwise>
-                                <img src="https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80" alt="Tour image" referrerpolicy="no-referrer">
+                                <img src="https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=800&q=80" alt="Tour image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
                             </c:otherwise>
                         </c:choose>
                     </div>

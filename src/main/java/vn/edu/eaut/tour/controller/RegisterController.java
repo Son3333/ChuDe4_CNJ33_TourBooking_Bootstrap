@@ -33,8 +33,8 @@ public class RegisterController extends HttpServlet {
             showError(req, resp, "Họ tên không được để trống và tối đa 100 ký tự.");
             return;
         }
-        if (password == null || !STRONG_PASSWORD.matcher(password).matches()) {
-            showError(req, resp, "Mật khẩu cần 8-64 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+        if (password == null || password.length() < 6) {
+            showError(req, resp, "Mật khẩu phải có ít nhất 6 ký tự.");
             return;
         }
         if (!password.equals(confirmPassword)) {

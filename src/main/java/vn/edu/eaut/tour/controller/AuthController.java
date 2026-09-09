@@ -27,10 +27,11 @@ public class AuthController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String u = req.getParameter("username");
         String p = req.getParameter("password");
-        String ip = req.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isBlank()) ip = req.getRemoteAddr();
-        String device = req.getHeader("User-Agent");
-        if (device == null || device.isBlank()) device = "Unknown Browser";
+        String rawIp = req.getHeader("X-Forwarded-For");
+        final String ip = (rawIp == null || rawIp.isBlank()) ? req.getRemoteAddr() : rawIp;
+        String rawDevice = req.getHeader("User-Agent");
+        final String device = (rawDevice == null || rawDevice.isBlank()) ? "Unknown Browser" : rawDevice;
+        final String finalUser = u;
 
         String key = ip + ":" + (u == null ? "" : u.trim().toLowerCase());
         LoginAttempts loginAttempts = attempts.computeIfAbsent(key, ignored -> new LoginAttempts());
@@ -43,7 +44,10 @@ public class AuthController extends HttpServlet {
         User user = new UserDAO().login(u, p);
         if (user != null) {
             attempts.remove(key);
-            new UserDAO().logLogin(user.getId(), u, ip, device, "SUCCESS", null);
+            final int uid = user.getId();
+            java.util.concurrent.CompletableFuture.runAsync(() -> {
+                try { new UserDAO().logLogin(uid, finalUser, ip, device, "SUCCESS", null); } catch (Exception ignored) {}
+            });
             HttpSession session = req.getSession();
             req.changeSessionId();
             session.setAttribute("user", user);
@@ -58,7 +62,9 @@ public class AuthController extends HttpServlet {
             }
         } else {
             loginAttempts.recordFailure();
-            new UserDAO().logLogin(null, u, ip, device, "FAILED", "Sai tài khoản hoặc mật khẩu");
+            java.util.concurrent.CompletableFuture.runAsync(() -> {
+                try { new UserDAO().logLogin(null, finalUser, ip, device, "FAILED", "Sai tài khoản hoặc mật khẩu"); } catch (Exception ignored) {}
+            });
             req.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
             req.getRequestDispatcher("login.jsp").forward(req, resp);
         }
