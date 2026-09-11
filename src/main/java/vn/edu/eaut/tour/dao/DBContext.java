@@ -64,6 +64,9 @@ public class DBContext {
         if (!url.contains("tcpKeepAlive=")) {
             url += (url.contains("?") ? "&" : "?") + "tcpKeepAlive=true";
         }
+        if (!url.contains("connectTimeout=")) {
+            url += (url.contains("?") ? "&" : "?") + "connectTimeout=5000&socketTimeout=10000";
+        }
         String user = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : DEFAULT_USER;
         String pass = System.getenv("DB_PASSWORD") != null ? System.getenv("DB_PASSWORD") : (System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : DEFAULT_PASS);
         return DriverManager.getConnection(url, user, pass);
